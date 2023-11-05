@@ -1,0 +1,38 @@
+type
+	linkedlist{
+		int data;
+		linkedlist next;
+	}
+endtype
+
+int main(){
+	decl
+		int temp,num,N;
+		linkedlist head,t;
+	enddecl
+
+	begin
+		temp=exposcall("Write",-2,"Enter N");
+		temp=exposcall("Read",-1,N);
+		num=0;
+		temp=initialize();
+		head=alloc();
+		t=head;
+
+		while(num<N) do 
+			temp=exposcall("Write",-2,"Enter Number");
+			temp=exposcall("Read",-1,t.data);
+			num=num+1;
+			t.next=alloc();
+			t=t.next;
+		endwhile;
+		//temp=free(t);
+
+		t=head;
+		while(t.next!=null) do 
+			temp=exposcall("Write",-2,t.data);
+			t=t.next;
+		endwhile;
+		return 0;
+	end
+}

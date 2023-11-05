@@ -1,0 +1,26 @@
+int main(){
+	decl
+		int temp,num,flag,fac;
+	enddecl
+
+	begin
+		num=2;
+		while(num<=100) do 
+			flag=1;
+			fac=2;
+			while(fac<num) do 
+				if((num%fac)==0) then
+					flag=0;
+					break;
+				endif;
+				fac=fac+1;
+			endwhile;
+			if(flag==1) then
+				temp=exposcall("Write",-2,"Prime: ");
+				temp=exposcall("Write",-2,num);
+			endif;
+			num=num+1;
+		endwhile;
+		return 0;
+	end
+}
