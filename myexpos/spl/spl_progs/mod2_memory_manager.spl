@@ -1,0 +1,91 @@
+alias functionNum R1;
+
+if(functionNum==GET_FREE_PAGE) then	
+	alias currentPID R2;
+	[SYSTEM_STATUS_TABLE+3]=[SYSTEM_STATUS_TABLE+3]+1;
+	while([SYSTEM_STATUS_TABLE+2]==0) do 
+		[PROCESS_TABLE+currentPID*16+4]=WAIT_MEM;
+
+		multipush(R1,R2);
+		call MOD_5;
+		multipop(R1,R2);
+	endwhile;
+
+	[SYSTEM_STATUS_TABLE+3]=[SYSTEM_STATUS_TABLE+3]-1;
+	[SYSTEM_STATUS_TABLE+2]=[SYSTEM_STATUS_TABLE+2]-1;
+
+	R0=83;
+	while(R0<MAX_MEM_PAGE) do 
+		if([MEMORY_FREE_LIST+R0]==0) then
+			[MEMORY_FREE_LIST+R0]=1;
+			break;
+		endif;
+		R0=R0+1;
+	endwhile;
+	return;
+endif;
+
+if(functionNum==RELEASE_PAGE) then	
+	alias pageNum R2;
+	[MEMORY_FREE_LIST+pageNum]=[MEMORY_FREE_LIST+pageNum]-1;
+	if([MEMORY_FREE_LIST+pageNum]==0) then
+		[SYSTEM_STATUS_TABLE+2]=[SYSTEM_STATUS_TABLE+2]+1;
+	endif;
+
+	alias counter R3;
+	counter=0;
+	while(counter<=15) do 
+		if([PROCESS_TABLE+16*counter+4]==WAIT_MEM) then
+			[PROCESS_TABLE+16*counter+4]=READY;
+		endif;
+		counter=counter+1;
+	endwhile;
+
+	return;
+endif;
+
+if(functionNum==GET_CODE_PAGE) then
+	alias blockNum R2;
+	alias cnt R3;
+	cnt=0;
+	alias offset R4;
+	offset=0;
+	while(cnt<16) do
+		offset=0;
+		while(offset<10) do 
+			if(blockNum==[DISK_MAP_TABLE+cnt*10+offset] && [[PROCESS_TABLE+cnt*16+14]+2*offset]!=-1) then
+				R0=[[PROCESS_TABLE+cnt*16+14]+2*offset];
+				[MEMORY_FREE_LIST+R0]=[MEMORY_FREE_LIST+R0]+1;
+				return;
+			endif;
+			offset=offset+1;
+		endwhile;
+		cnt=cnt+1;
+	endwhile;
+
+	multipush(R1,R2);
+	R1=GET_FREE_PAGE;
+	R2=[SYSTEM_STATUS_TABLE+1];
+
+	call MOD_2;
+
+	multipop(R1,R2);
+
+	multipush(R0,R1,R2);
+	R4=R2;
+	R1=DISK_LOAD;
+	R2=[SYSTEM_STATUS_TABLE+1];
+	R3=R0;
+	call MOD_4;
+
+	multipop(R0,R1,R2);
+	return;
+endif;
+
+if(functionNum==RELEASE_BLOCK) then
+	alias blockNum R2;	
+
+	[DISK_FREE_LIST+blockNum]=0;
+
+	return;
+endif;
