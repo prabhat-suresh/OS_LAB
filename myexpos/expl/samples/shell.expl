@@ -18,13 +18,11 @@ begin
             if(pid != 0) then
                 temp = exposcall("Wait",pid);
             else
-		breakpoint;
                 temp = exposcall("Exec",input);
                 if(temp != 0) then
                     temp = exposcall("Write",-2, "BAD COMMAND");
                     break;
                 endif;
-		breakpoint;
             endif;
         else
             temp = exposcall("Shutdown");

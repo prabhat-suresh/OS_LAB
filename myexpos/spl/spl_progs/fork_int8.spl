@@ -1,41 +1,46 @@
-[PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
-SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
+alias proc_table_entry R1;
+proc_table_entry=PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16);
+[proc_table_entry + 13] = SP;
+SP = [proc_table_entry + 11] * 512 - 1;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 8;
+[proc_table_entry + 9] = 8;
 
+multipush(R0,R1);
 R1=GET_PCB_ENTRY;
 alias childPID R11;
 call MOD_1;
 childPID=R0;
+multipop(R0,R1);
 
 if(childPID==-1) then
-	[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+	[proc_table_entry + 9] = 0;
 
-	SP = [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13];
+	SP = [proc_table_entry + 13];
 
-	[[PTBR + 2 * ((([PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13]) - 1) / 512)] * 512 + (([PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13]) - 1) % 512]=-1;
+	[[PTBR + 2 * ((([proc_table_entry + 13]) - 1) / 512)] * 512 + (([proc_table_entry + 13]) - 1) % 512]=-1;
 
 	ireturn;
 endif;
 
 if([PTBR+4]==-1) then
+	multipush(R0,R1,R11);
 	R1=GET_FREE_PAGE;
 	R2=[SYSTEM_STATUS_TABLE+1];
-	multipush(R11);
 	call MOD_2;
 	[PTBR+4]=R0;
 	[PTBR+5]="1110";
-	multipop(R11);
+	multipop(R0,R1,R11);
 
+	multipush(R0,R1,R11);
 	R1=GET_FREE_PAGE;
 	R2=[SYSTEM_STATUS_TABLE+1];
-	multipush(R11);
 	call MOD_2;
 	[PTBR+6]=R0;
 	[PTBR+7]="1110";
-	multipop(R11);
+	multipop(R0,R1,R11);
 endif;
 
+multipush(R0,R1);
 R1=GET_FREE_PAGE;
 R2=childPID;
 multipush(R11);
@@ -43,7 +48,9 @@ call MOD_2;
 multipop(R11);
 [PAGE_TABLE_BASE+childPID*20+16]=R0;
 [PAGE_TABLE_BASE+20*childPID+17]="0110";
+multipop(R0,R1);
 
+multipush(R0,R1);
 R1=GET_FREE_PAGE;
 R2=childPID;
 multipush(R11);
@@ -51,21 +58,24 @@ call MOD_2;
 multipop(R11);
 [PAGE_TABLE_BASE+20*childPID+18]=R0;
 [PAGE_TABLE_BASE+20*childPID+19]="0110";
+multipop(R0,R1);
 
+multipush(R0,R1);
 R1=GET_FREE_PAGE;
 R2=childPID;
 multipush(R11);
 call MOD_2;
 multipop(R11);
 [PROCESS_TABLE+16*childPID+11]=R0;
+multipop(R0,R1);
 
 // initialize process table
 
-[PROCESS_TABLE+16*childPID+3]=[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 3];
-[PROCESS_TABLE+16*childPID+6]=[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 6];
-[PROCESS_TABLE+16*childPID+7]=[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 7];
-[PROCESS_TABLE+16*childPID+10]=[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 10];
-[PROCESS_TABLE+16*childPID+13]=[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 13];
+[PROCESS_TABLE+16*childPID+3]= [proc_table_entry + 3];
+[PROCESS_TABLE+16*childPID+6]= [proc_table_entry + 6];
+[PROCESS_TABLE+16*childPID+7]= [proc_table_entry + 7];
+[PROCESS_TABLE+16*childPID+10]=[proc_table_entry + 10];
+[PROCESS_TABLE+16*childPID+13]=[proc_table_entry + 13];
 
 [PROCESS_TABLE+16*childPID+0]=0;
 [PROCESS_TABLE+16*childPID+9]=0;
@@ -100,12 +110,26 @@ endwhile;
 
 [[PROCESS_TABLE + childPID*16 + 11]*512] = BP;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+[proc_table_entry + 9] = 0;
 
-SP = [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13];
+SP = [proc_table_entry + 13];
 
-[[PTBR + 2 * ((([PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13]) - 1) / 512)] * 512 + (([PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13]) - 1) % 512]=childPID;
+[[PTBR + 2 * ((([proc_table_entry + 13]) - 1) / 512)] * 512 + (([proc_table_entry + 13]) - 1) % 512]=childPID;
 
-[[PAGE_TABLE_BASE+20*childPID + 2 * ((([PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13]) - 1) / 512)] * 512 + (([PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13]) - 1) % 512]=0;
+[[PAGE_TABLE_BASE+20*childPID + 2 * ((([proc_table_entry + 13]) - 1) / 512)] * 512 + (([proc_table_entry + 13]) - 1) % 512]=0;
 
+alias pprtp R13;
+alias pprtc R14;
+pprtp=[PROCESS_TABLE+16*[SYSTEM_STATUS_TABLE+1]+11]*512+496;
+pprtc=[PROCESS_TABLE+16*childPID+11]*512+496;
+
+counter=0;
+while(counter<8) do 
+	[pprtc+counter*2]=[pprtp+counter*2];
+	[pprtc+counter*2+1]=[pprtp+counter*2+1];
+	if([pprtp+counter*2]==SEMAPHORE) then
+		[SEMAPHORE_TABLE+[pprtp+counter*2+1]*4+1]=[SEMAPHORE_TABLE+[pprtp+counter*2+1]*4+1]+1;
+	endif;
+	counter=counter+1;
+endwhile;
 ireturn;

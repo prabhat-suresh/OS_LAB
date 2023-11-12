@@ -60,6 +60,15 @@ loadi(25,38);
 loadi(32,45);	// int 15
 loadi(33,46);
 
+loadi(28,41);	// int 13
+loadi(29,42);
+
+loadi(30,43);	// int 14
+loadi(31,44);
+
+loadi(10,23);	// int 4
+loadi(11,24);
+
 PTBR=PAGE_TABLE_BASE+20;
 
 // pid 1 (init (odd))
@@ -230,5 +239,39 @@ endwhile;
 
 [SYSTEM_STATUS_TABLE+3]=0;
 [SYSTEM_STATUS_TABLE+2]=128-83;
+
+counter=0;
+while(counter<32) do 
+	[SEMAPHORE_TABLE+counter*4]=-1;
+	[SEMAPHORE_TABLE+counter*4+1]=0;
+	counter=counter+1;
+endwhile;
+
+counter=0;
+alias pprt R15;
+pprt=[PROCESS_TABLE+16*[SYSTEM_STATUS_TABLE+1]+11]*512+RESOURCE_TABLE_OFFSET;
+while(counter<16) do
+	[pprt+counter]=-1;
+	counter=counter+2;
+endwhile;
+
+//initializing file status Table
+counter=0;
+while(counter<MAX_FILE_NUM) do
+	[FILE_STATUS_TABLE+counter*4]=-1;
+	[FILE_STATUS_TABLE+counter*4+1]=-1;
+	counter=counter+1;
+endwhile;
+
+//initializing BUFFER_TABLE
+counter=0;
+while(counter<4) do
+	[BUFFER_TABLE+counter*4]=-1;
+	[BUFFER_TABLE+counter*4+1]=0;
+	[BUFFER_TABLE+counter*4+2]=-1;
+	counter=counter+1;
+endwhile;
+
+[PROCESS_TABLE+16+3]=1; //init userid is set to root
 
 return;
