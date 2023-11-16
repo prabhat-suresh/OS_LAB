@@ -12,7 +12,7 @@ fileName = [([PTBR + (2 * ((userSP - 4)/ 512))]* 512) + ((userSP - 4) % 512)];
 alias inode_entry R2;
 inode_entry=0;
 while(inode_entry<MAX_FILE_NUM) do 
-	if(fileName==[INODE_TABLE + inode_entry*16 + 1]) then
+	if(fileName==[INODE_TABLE + inode_entry*16 + 1] && [INODE_TABLE + inode_entry*16]==EXEC) then
 		break;
 	endif;
 	inode_entry=inode_entry+1;

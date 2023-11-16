@@ -89,3 +89,16 @@ if(functionNum==RELEASE_BLOCK) then
 
 	return;
 endif;
+
+if(functionNum==GET_FREE_BLOCK) then
+	R0=DISK_FREE_AREA;
+	while(R0<DISK_SWAP_AREA) do
+		if([DISK_FREE_LIST+R0]==0) then
+			[DISK_FREE_LIST+R0]=1;
+			return;
+		endif;
+		R0=R0+1;
+	endwhile;
+	R0=-1;
+	return;
+endif;

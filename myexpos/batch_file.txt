@@ -15,6 +15,7 @@ load --int=11 $HOME/OS_LAB/myexpos/spl/spl_progs/int11.xsm
 load --int=13 $HOME/OS_LAB/myexpos/spl/spl_progs/int13.xsm
 load --int=14 $HOME/OS_LAB/myexpos/spl/spl_progs/int14.xsm
 load --int=4 $HOME/OS_LAB/myexpos/spl/spl_progs/int4.xsm
+load --int=5 $HOME/OS_LAB/myexpos/spl/spl_progs/int5.xsm
 load --int=console $HOME/OS_LAB/myexpos/spl/spl_progs/console_interrupt_handler.xsm
 load --idle $HOME/OS_LAB/myexpos/expl/samples/idle_process.xsm
 load --module 7 $HOME/OS_LAB/myexpos/spl/spl_progs/boot_module.xsm
@@ -23,7 +24,10 @@ load --module 4 $HOME/OS_LAB/myexpos/spl/spl_progs/device_manager_module.xsm
 load --module 5 $HOME/OS_LAB/myexpos/spl/spl_progs/scheduler.xsm
 load --module 1 $HOME/OS_LAB/myexpos/spl/spl_progs/mod1_process_manager_module.xsm
 load --module 2 $HOME/OS_LAB/myexpos/spl/spl_progs/mod2_memory_manager.xsm
-load --exec $HOME/OS_LAB/myexpos/expl/samples/randw.xsm
+load --module 3 $HOME/OS_LAB/myexpos/spl/spl_progs/mod3_file_manager.xsm
+load --exec $HOME/OS_LAB/myexpos/expl/samples/readfile.xsm
 load --exec $HOME/OS_LAB/myexpos/expl/samples/createF.xsm
 load --exec $HOME/OS_LAB/myexpos/expl/samples/deleteF.xsm
+load --exec $HOME/OS_LAB/myexpos/expl/samples/st25as1.xsm
+load --data $HOME/OS_LAB/myexpos/sample.dat
 dump --inodeusertable

@@ -23,7 +23,29 @@ if(sysNum==INT_SHUTDOWN) then
         ireturn; 
     endif;
 
-    //multipush(R0,R1,R2,R7);
+    multipush(R0,R1,R2,R7);
+    
+    R1=KILL_ALL;
+    R2=[SYSTEM_STATUS_TABLE+1];
+    R3=[SYSTEM_STATUS_TABLE+1];
+    call PROCESS_MANAGER;
+
+    multipop(R0,R1,R2,R7);
+
+    alias cntr R5;
+    cntr=0;
+    while(cntr<MAX_BUFFER) do
+        if([BUFFER_TABLE+4*cntr]!=-1 && [BUFFER_TABLE+4*cntr+1]==1) then
+            multipush(R0,R1,R5,R2,R7);
+            R1=DISK_STORE;
+            R2=[SYSTEM_STATUS_TABLE+1];
+            R3=BUFFER_BASE+cntr;
+            R4=[BUFFER_TABLE+4*cntr];
+            call DEVICE_MANAGER;
+            multipop(R0,R1,R5,R2,R7);
+        endif;
+        cntr=cntr+1;
+    endwhile;
 
     R1=DISK_STORE;
     R2=[SYSTEM_STATUS_TABLE+1];

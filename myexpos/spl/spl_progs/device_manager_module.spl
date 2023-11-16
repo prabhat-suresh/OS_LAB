@@ -44,6 +44,9 @@ if(functionNum==TERMINAL_READ) then
 endif;
 
 if(functionNum==DISK_LOAD) then
+	alias pageNum R3;
+	alias blockNum R4;
+
 	multipush(R1,R2,R3,R4);
 	R1=ACQUIRE_DISK;
 	R2=currentPID;
@@ -51,10 +54,10 @@ if(functionNum==DISK_LOAD) then
 	multipop(R1,R2,R3,R4);
 
 	[DISK_STATUS_TABLE+1]=0;
-	[DISK_STATUS_TABLE+2]=R3;
-	[DISK_STATUS_TABLE+3]=R4;
+	[DISK_STATUS_TABLE+2]=pageNum;
+	[DISK_STATUS_TABLE+3]=blockNum;
 
-	load(R3,R4);
+	load(pageNum,blockNum);
 	[PROCESS_TABLE+currentPID*16+4]=WAIT_DISK;
 	call MOD_5;
 	return;

@@ -69,6 +69,12 @@ loadi(31,44);
 loadi(10,23);	// int 4
 loadi(11,24);
 
+loadi(12,25);	// int 5
+loadi(13,26);
+
+loadi(46,59);	// mod 3
+loadi(47,60);
+
 PTBR=PAGE_TABLE_BASE+20;
 
 // pid 1 (init (odd))
@@ -248,8 +254,8 @@ while(counter<32) do
 endwhile;
 
 counter=0;
-alias pprt R15;
-pprt=[PROCESS_TABLE+16*[SYSTEM_STATUS_TABLE+1]+11]*512+RESOURCE_TABLE_OFFSET;
+alias pprt R10;
+pprt=[PROCESS_TABLE+16+11]*512+RESOURCE_TABLE_OFFSET;
 while(counter<16) do
 	[pprt+counter]=-1;
 	counter=counter+2;
@@ -273,5 +279,12 @@ while(counter<4) do
 endwhile;
 
 [PROCESS_TABLE+16+3]=1; //init userid is set to root
+
+counter=0;
+while(counter<MAX_OPENFILE_NUM) do
+	[OPEN_FILE_TABLE+counter*4]=-1;
+	[OPEN_FILE_TABLE+counter*4+1]=0;
+	counter=counter+1;
+endwhile;
 
 return;

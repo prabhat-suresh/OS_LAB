@@ -1,0 +1,22 @@
+int main()
+{
+decl
+    int temp, iter, permission, fd;
+    string filename;
+enddecl
+
+begin
+    temp=exposcall("Read",-1,filename);
+    temp=exposcall("Read",-1,permission);
+    temp=exposcall("Create",filename, permission);
+
+    fd=exposcall("Open",filename);
+    iter=1;
+
+    while(iter <= 10) do
+        temp=exposcall("Write",fd, iter);
+        iter=iter+1;
+    endwhile;
+    return 0;
+end
+}
