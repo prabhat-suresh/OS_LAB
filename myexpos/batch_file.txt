@@ -29,5 +29,6 @@ load --exec $HOME/OS_LAB/myexpos/expl/samples/readfile.xsm
 load --exec $HOME/OS_LAB/myexpos/expl/samples/createF.xsm
 load --exec $HOME/OS_LAB/myexpos/expl/samples/deleteF.xsm
 load --exec $HOME/OS_LAB/myexpos/expl/samples/st25as1.xsm
+load --exec $HOME/OS_LAB/myexpos/expl/samples/st25as3.xsm
 load --data $HOME/OS_LAB/myexpos/sample.dat
 dump --inodeusertable

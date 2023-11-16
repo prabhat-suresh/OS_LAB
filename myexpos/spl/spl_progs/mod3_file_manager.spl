@@ -45,6 +45,7 @@ if(functionNum==OPEN) then
         endif;
         oftIndex=oftIndex+1;
     endwhile;
+    R0=oftIndex;
 
     if(oftIndex==MAX_OPENFILE_NUM) then
         
@@ -74,7 +75,6 @@ if(functionNum==OPEN) then
     R2=[SYSTEM_STATUS_TABLE+1];
     R3=inode_index;
     call RESOURCE_MANAGER;
-    R0=oftIndex;
     return;
 endif;
 

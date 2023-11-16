@@ -1,7 +1,7 @@
 int main()
 {
 decl
-    int temp, iter, permission, fd;
+    int temp,data, iter, permission, fd;
     string filename;
 enddecl
 
@@ -16,6 +16,13 @@ begin
     while(iter <= 10) do
         temp=exposcall("Write",fd, iter);
         iter=iter+1;
+    endwhile;
+    
+    temp=exposcall("Seek",fd,-1);
+    while(temp!=-2) do
+        temp=exposcall("Read",fd,data);
+        temp=exposcall("Write",-2,data);
+        temp=exposcall("Seek",fd,-2);
     endwhile;
     return 0;
 end
