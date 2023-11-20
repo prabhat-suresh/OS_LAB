@@ -43,6 +43,17 @@ multipop(R0,R1,R2,R3);
 
 SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
 
+alias pprt R3;
+pprt=[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 + RESOURCE_TABLE_OFFSET;
+
+alias cnt R4;
+cnt=0;
+while(cnt<16) do
+	[pprt+cnt]=-1;
+	cnt=cnt+1;
+endwhile;
+
+[PROCESS_TABLE+[SYSTEM_STATUS_TABLE + 1]*16+7]=inode_entry;
 [PROCESS_TABLE+[SYSTEM_STATUS_TABLE + 1]*16+4]=RUNNING;
 
 //Library
@@ -129,7 +140,6 @@ multipop(R0,R1,R2,R3);
 [PTBR+14]=-1;
 [PTBR+15]="0000";
 
-alias cnt R4;
 cnt=2;
 while(cnt<10) do 
 	[DISK_MAP_TABLE+10*[SYSTEM_STATUS_TABLE + 1]+cnt]=-1;

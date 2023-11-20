@@ -6,9 +6,9 @@ pt_entry=PROCESS_TABLE+currentPID*16;
 if(functionNum==8) then		//acquire terminal
 	while([TERMINAL_STATUS_TABLE]==1) do 
 		[pt_entry+4]=WAIT_TERMINAL;
-		multipush(R1,R2);
+		multipush(R1,R2,R7);
 		call MOD_5;
-		multipop(R1,R2);
+		multipop(R1,R2,R7);
 	endwhile;
 
 	[TERMINAL_STATUS_TABLE+0]=1;
@@ -40,9 +40,9 @@ endif;
 if(functionNum==ACQUIRE_DISK) then
 	while([DISK_STATUS_TABLE+0]==1) do 
 		[pt_entry+4]=WAIT_DISK;
-		multipush(R1,R2);
+		multipush(R1,R2,R7);
 		call MOD_5;
-		multipop(R1,R2);
+		multipop(R1,R2,R7);
 	endwhile;
 
 	[DISK_STATUS_TABLE+0]=1;

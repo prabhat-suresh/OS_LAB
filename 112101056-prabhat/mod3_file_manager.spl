@@ -56,7 +56,7 @@ if(functionNum==OPEN) then
         R0=-2;
         return;
     endif;
-
+    
     if(filename=="root") then
         [OPEN_FILE_TABLE+oftIndex*4]=INODE_ROOT;
     else 
@@ -71,10 +71,12 @@ if(functionNum==OPEN) then
     [OPEN_FILE_TABLE+oftIndex*4+1]=1;
     [OPEN_FILE_TABLE+oftIndex*4+2]=0;
 
+    multipush(R0,R4);
     R1=RELEASE_INODE; 
     R2=[SYSTEM_STATUS_TABLE+1];
     R3=inode_index;
     call RESOURCE_MANAGER;
+    multipop(R0,R4);
     return;
 endif;
 

@@ -28,7 +28,7 @@ if([PTBR+4]==-1) then
 	R2=[SYSTEM_STATUS_TABLE+1];
 	call MOD_2;
 	[PTBR+4]=R0;
-	[PTBR+5]="1110";
+	[PTBR+5]="0110";
 	multipop(R0,R1,R11);
 
 	multipush(R0,R1,R11);
@@ -36,7 +36,7 @@ if([PTBR+4]==-1) then
 	R2=[SYSTEM_STATUS_TABLE+1];
 	call MOD_2;
 	[PTBR+6]=R0;
-	[PTBR+7]="1110";
+	[PTBR+7]="0110";
 	multipop(R0,R1,R11);
 endif;
 
@@ -84,7 +84,7 @@ multipop(R0,R1);
 [PROCESS_TABLE+16*childPID+4]=CREATED;
 
 alias counter R12;
-counter=2;
+counter=0;
 
 while (counter<10) do 
 	[DISK_MAP_TABLE+childPID*10+counter]=[DISK_MAP_TABLE+[SYSTEM_STATUS_TABLE+1]*10+counter];

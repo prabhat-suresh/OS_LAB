@@ -4,8 +4,6 @@ loadi(70,12);	// idle process
 loadi(54,67);
 loadi(55,68);	//module 7 (boot module)
 
-SP = 82*512-1;
-
 call BOOT_MODULE;	// or call MOD_7
 
 PTBR=PAGE_TABLE_BASE;  //as PID of idle process is 0

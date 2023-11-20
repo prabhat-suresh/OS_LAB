@@ -117,8 +117,8 @@ if(sysNum==INT_DELETE) then
             alias cntr R5;
             cntr=8;
             while(cntr<12) do
-                if([BUFFER_TABLE+[INODE_TABLE+inode_index*16+cntr]%MAX_BUFFER]==[INODE_TABLE+16*inode_index+cntr]) then
-                    [BUFFER_TABLE+[INODE_TABLE+inode_index*16+cntr]%MAX_BUFFER+1]=0;
+                if([BUFFER_TABLE+([INODE_TABLE+inode_index*16+cntr]%MAX_BUFFER)*4]==[INODE_TABLE+16*inode_index+cntr]) then
+                    [BUFFER_TABLE+([INODE_TABLE+inode_index*16+cntr]%MAX_BUFFER)*4+1]=0;
                 endif;
 
                 multipush(R0,R1,R2,R3,R4,R5,R7);

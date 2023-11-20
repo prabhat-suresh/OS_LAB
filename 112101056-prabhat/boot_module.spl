@@ -46,6 +46,8 @@ loadi(45,58);
 loadi(59,3);	// Inode Table
 loadi(60,4);
 
+loadi(62,5);	// Root file
+
 loadi(6,19);	// Disk interrupt 
 loadi(7,20);
 

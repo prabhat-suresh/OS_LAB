@@ -36,7 +36,7 @@ else
 	endif;
 
 	alias pprt R6;
-	pprt=[pt_entry+16*[SYSTEM_STATUS_TABLE+1]+11]*512+RESOURCE_TABLE_OFFSET;
+	pprt=[pt_entry+11]*512+RESOURCE_TABLE_OFFSET;
 
 	if([pprt+fileDescriptor*2]!=FILE) then
 		[ret_addr]=-1;
