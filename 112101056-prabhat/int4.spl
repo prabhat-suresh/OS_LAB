@@ -1,0 +1,151 @@
+alias userSP R0;
+alias sysNum R1;
+alias ret_addr R2;
+alias pt_entry R7;
+pt_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+
+userSP=SP;
+sysNum = [([PTBR + (2 * ((userSP - 5)/ 512))]* 512) + ((userSP - 5) % 512)];
+ret_addr = ([PTBR + (2 * ((userSP - 1)/ 512))]* 512) + ((userSP - 1) % 512);
+
+[pt_entry + 13] = SP;
+SP = [pt_entry + 11] * 512 - 1;
+
+[pt_entry + 9] = sysNum;
+
+if(sysNum==INT_CREATE) then
+    alias filename R3;
+    alias permission R4;
+    filename=[([PTBR + (2 * ((userSP - 4)/ 512))]* 512) + ((userSP - 4) % 512)];
+    permission=[([PTBR + (2 * ((userSP - 3)/ 512))]* 512) + ((userSP - 3) % 512)];
+    
+    alias cntr R5;
+    cntr=0;
+    while(cntr<MAX_FILE_NUM) do
+        if([INODE_TABLE+16*cntr+1]==filename) then
+            
+            [ret_addr]=0;
+            SP=[pt_entry + 13];
+            [pt_entry + 9] = 0;
+
+            ireturn; 
+        endif;
+        cntr=cntr+1;
+    endwhile;
+
+    cntr=0;
+    alias inode_entry R6;
+    while(cntr<MAX_FILE_NUM) do
+        inode_entry=INODE_TABLE+16*cntr;
+        if([inode_entry+1]==-1) then
+            [inode_entry+1]=filename;
+            [inode_entry+2]=0;
+            [inode_entry+0]=DATA;
+            
+            [inode_entry+8]=-1;
+            [inode_entry+9]=-1;
+            [inode_entry+10]=-1;
+            [inode_entry+11]=-1;
+
+            [inode_entry+3]=[pt_entry+3];
+            [inode_entry+4]=permission;
+
+            [ROOT_FILE+cntr*8]=filename;
+            [ROOT_FILE+cntr*8+1]=0;
+            [ROOT_FILE+cntr*8+2]=DATA;
+            [ROOT_FILE+cntr*8+3]=[USER_TABLE+2*[pt_entry+3]];
+            [ROOT_FILE+cntr*8+4]=permission;
+            
+            [ret_addr]=0;
+            SP=[pt_entry + 13];
+            [pt_entry + 9] = 0;
+
+            ireturn; 
+        endif;
+        cntr=cntr+1;
+    endwhile;
+    
+    [ret_addr]=-1;
+endif;
+
+if(sysNum==INT_DELETE) then
+    alias filename R3;
+    filename=[([PTBR + (2 * ((userSP - 4)/ 512))]* 512) + ((userSP - 4) % 512)];
+    alias inode_index R4;
+    inode_index=0;
+    while(inode_index<MAX_FILE_NUM) do
+        if([INODE_TABLE+inode_index*16+1]==filename) then
+            if([INODE_TABLE+inode_index*16]!=DATA) then
+                [ret_addr]=-1;
+                SP=[pt_entry + 13];
+                [pt_entry + 9] = 0;
+
+                ireturn; 
+            endif;
+            
+            if([INODE_TABLE+inode_index*16+4]==EXCLUSIVE && [pt_entry+3]!=1 && [INODE_TABLE+inode_index*16+3]!=[pt_entry+3]) then
+                [ret_addr]=-1;
+                SP=[pt_entry + 13];
+                [pt_entry + 9] = 0;
+
+                ireturn; 
+            endif;
+
+            multipush(R0,R1,R2,R3,R4,R7);
+            R1=ACQUIRE_INODE;
+            R2=[SYSTEM_STATUS_TABLE+1];
+            R3=inode_index;
+            call RESOURCE_MANAGER;
+            multipop(R0,R1,R2,R3,R4,R7);
+
+            if([FILE_STATUS_TABLE+4*inode_index+1]!=-1) then
+
+                multipush(R0,R1,R2,R3,R4,R7);
+                R1=RELEASE_INODE;
+                R2=[SYSTEM_STATUS_TABLE+1];
+                R3=inode_index;
+                call RESOURCE_MANAGER;
+                multipop(R0,R1,R2,R3,R4,R7);
+
+                [ret_addr]=-2;
+                SP=[pt_entry + 13];
+                [pt_entry + 9] = 0;
+
+                ireturn; 
+            endif;
+
+            alias cntr R5;
+            cntr=8;
+            while(cntr<12) do
+                if([BUFFER_TABLE+[INODE_TABLE+inode_index*16+cntr]%MAX_BUFFER]==[INODE_TABLE+16*inode_index+cntr]) then
+                    [BUFFER_TABLE+[INODE_TABLE+inode_index*16+cntr]%MAX_BUFFER+1]=0;
+                endif;
+
+                multipush(R0,R1,R2,R3,R4,R5,R7);
+                R1=RELEASE_BLOCK;
+                R2=[INODE_TABLE+inode_index*16+cntr];
+                call MEMORY_MANAGER;
+                multipop(R0,R1,R2,R3,R4,R5,R7);
+                
+                cntr=cntr+1;
+            endwhile;
+            [INODE_TABLE+inode_index*16+1]=-1;
+            [ROOT_FILE+inode_index*8]=-1;
+        
+            multipush(R0,R1,R2,R3,R4,R5,R7);
+            R1=RELEASE_INODE;
+            R2=[SYSTEM_STATUS_TABLE+1];
+            R3=inode_index;
+            call RESOURCE_MANAGER;
+            multipop(R0,R1,R2,R3,R4,R5,R7);
+        endif;
+        inode_index=inode_index+1;
+    endwhile;
+
+    [ret_addr]=0;
+endif;
+
+SP=[pt_entry + 13];
+[pt_entry + 9] = 0;
+
+ireturn; 

@@ -1,0 +1,79 @@
+alias userSP R0;
+alias sysNum R1;
+alias ret_addr R2;
+alias pt_entry R7;
+pt_entry=PROCESS_TABLE+[SYSTEM_STATUS_TABLE+1]*16;
+
+userSP=SP;
+sysNum = [([PTBR + (2 * ((userSP - 5)/ 512))]* 512) + ((userSP - 5) % 512)];
+ret_addr = ([PTBR + (2 * ((userSP - 1)/ 512))]* 512) + ((userSP - 1) % 512);
+
+[pt_entry + 13] = SP;
+SP = [pt_entry + 11] * 512 - 1;
+
+[pt_entry + 9] = sysNum;
+
+if(sysNum==INT_SHUTDOWN) then
+    if([SYSTEM_STATUS_TABLE+1]!=1 || [pt_entry+3]!=ROOT) then
+        [ret_addr]=-1;
+
+        SP=[pt_entry + 13];
+        [pt_entry + 9] = 0;
+
+        ireturn; 
+    endif;
+
+    multipush(R0,R1,R2,R7);
+    
+    R1=KILL_ALL;
+    R2=[SYSTEM_STATUS_TABLE+1];
+    R3=[SYSTEM_STATUS_TABLE+1];
+    call PROCESS_MANAGER;
+
+    multipop(R0,R1,R2,R7);
+
+    alias cntr R5;
+    cntr=0;
+    while(cntr<MAX_BUFFER) do
+        if([BUFFER_TABLE+4*cntr]!=-1 && [BUFFER_TABLE+4*cntr+1]==1) then
+            multipush(R0,R1,R5,R2,R7);
+            R1=DISK_STORE;
+            R2=[SYSTEM_STATUS_TABLE+1];
+            R3=BUFFER_BASE+cntr;
+            R4=[BUFFER_TABLE+4*cntr];
+            call DEVICE_MANAGER;
+            multipop(R0,R1,R5,R2,R7);
+        endif;
+        cntr=cntr+1;
+    endwhile;
+
+    R1=DISK_STORE;
+    R2=[SYSTEM_STATUS_TABLE+1];
+    R3=59;
+    R4=3;
+    call DEVICE_MANAGER;
+
+    R1=DISK_STORE;
+    R2=[SYSTEM_STATUS_TABLE+1];
+    R3=60;
+    R4=4;
+    call DEVICE_MANAGER;
+    
+    R1=DISK_STORE;
+    R2=[SYSTEM_STATUS_TABLE+1];
+    R3=61;
+    R4=2;
+    call DEVICE_MANAGER;
+    
+    R1=DISK_STORE;
+    R2=[SYSTEM_STATUS_TABLE+1];
+    R3=62;
+    R4=5;
+    call DEVICE_MANAGER;
+    halt;
+endif;
+
+SP=[pt_entry + 13];
+[pt_entry + 9] = 0;
+
+ireturn; 
